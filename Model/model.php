@@ -14,7 +14,7 @@ class Model {
         $stmt = $this->conn->prepare($query);
         if ($params) { $stmt->bind_param($types, ...$params); }
 
-        if (!$stmt->execute()) { return false; }
+        if (!$stmt->execute()) { return false;}
 
         if (stripos(trim($query), "SELECT") === 0) {
             $result = $stmt->get_result();
@@ -287,6 +287,18 @@ class Model {
         return $this->executeQuery($query);
     }
 
+    public function getUserFeedback($idUser) {
+        $query = "SELECT * FROM feedback where id_usuario = ?";
+        return $this->executeQuery($query, [$idUser], "i");
+    }
+
+    // retona o dia da semana associado a um determinado cardapio
+    public function getDiaByID($idCardapio)
+    {
+        $query = "SELECT dia FROM cardapio where id = ? AND ind_excluido = 0";
+        return $this->executeQuery($query, [$idCardapio], "i");
+    }
+
     // buscar mais detalhes do feedback
     public function getFeedbackDetails($idCardapio) {
         $query = "SELECT 
@@ -347,6 +359,20 @@ class Model {
 
         // print_r($success); exit();
         return in_array(false, $sucess, true) ? false : true;
+    }
+
+    // retorna as refeições que ainda estão agendadas em um determinado dia
+    public function getRelatorioFaltas($day)
+    {
+        $query = "SELECT id_usuario, hora_solicitacao FROM refeicao where id_status_ref=1 AND data_solicitacao = ?";
+        return $this->executeQuery($query, [$day], 's');
+    }
+
+    public function getNameById($id)
+    {
+        $query = "SELECT nome FROM usuario WHERE id = ?";
+        $result = $this->executeQuery($query, [$id], 'i');
+        return empty($result)? [] : $result[0];
     }
 }
 ?>
